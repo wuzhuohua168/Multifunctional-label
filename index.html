@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>HCN 业务综合工作台</title>
+
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://s3.tradingview.com/tv.js"></script>
+
+<style>
+    /* --- 1. 基础框架与导航 --- */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #f0f3f7; padding-bottom: 70px; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+    
+    .tab-content { display: none; padding: 10px; flex: 1; overflow-y: auto; }
+    .tab-content.active { display: flex; flex-direction: column; }
+
+    .tab-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: #fff; display: flex; border-top: 1px solid #e0e0e0; z-index: 9999; }
+    .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #8a8a8a; font-size: 10px; cursor: pointer; }
+    .tab-item.active { color: #4a90e2; font-weight: bold; }
+    .tab-icon { font-size: 20px; margin-bottom: 2px; }
+
+    /* --- 2. 标签样式 (完全保留您的原生精准样式) --- */
+    #container { margin: 0 auto; position: relative; }
+    .page-wrapper { overflow: hidden; position: relative; background: #fff; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin: 0 auto 5px; }
+    .page-wrapper.size-100 { width: 100mm; height: 100mm; }
+    .page-wrapper.size-80 { width: 80mm; height: 80mm; }
+    .page-wrapper.size-50 { width: 100mm; height: 50mm; }
+
+    /* 导出模式修正 */
+    .export-mode .page-wrapper { margin: 0 !important; box-shadow: none !important; border: none !important; }
+
+    .label-content { width: 100%; height: 100%; padding: 4mm; display: flex; flex-direction: column; align-items: center; justify-content: space-between; border: 1px solid #f0f0f0; }
+    .label-content.size-80 { padding: 3mm; }
+    .label-content.size-50 { padding: 2mm; }
+
+    .header-mode { width: 100%; text-align: center; font-size: 20px; font-weight: bold; border-bottom: 4px solid #000; padding-bottom: 1.5mm; }
+    .size-80 .header-mode { font-size: 18px; border-bottom: 3px solid #000; }
+    .size-50 .header-mode { font-size: 14px; border-bottom: 2px solid #000; padding-bottom: 1mm; }
+
+    .mid-info { text-align: center; width: 100%; margin: 1mm 0; }
+    .big-qty { font-size: 38px; font-weight: 900; line-height: 1; }
+    .size-80 .big-qty { font-size: 32px; }
+    .size-50 .big-qty { font-size: 20px; }
+
+    .big-tracking {
+        font-size: 22px; font-weight: 900; font-family: monospace;
+        display: block; border-top: 2px solid #000; border-bottom: 2px solid #000;
+        padding: 1.5mm 0; margin: 1.5mm 0;
+    }
+    .size-80 .big-tracking { font-size: 18px; }
+    .size-50 .big-tracking { font-size: 14px; padding: 1mm 0; margin: 1mm 0; }
+
+    .barcode-area { width: 100%; flex: 1; display: flex; align-items: center; justify-content: center; min-height: 35mm; }
+    .barcode-img, .qrcode-container { max-width: 100%; max-height: 100%; height: auto; display: block; }
+
+    .footer-made { width: 100%; border: 3px solid #000; text-align: center; font-size: 18px; font-weight: bold; padding: 1mm; }
+    .size-80 .footer-made { font-size: 16px; border: 2px solid #000; }
+    .size-50 .footer-made { font-size: 12px; border: 2px solid #000; padding: 0.5mm; }
+
+    /* 控制面板 */
+    .controls { max-width: 450px; margin: 0 auto 20px; background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    .row { margin-bottom: 10px; }
+    label { font-size: 12px; font-weight: bold; color: #666; display: block; margin-bottom: 4px; }
+    input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+    #custom-mode-row { display: none; margin-top: 5px; }
+    .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+    .btn-main { flex: 1; padding: 15px; border: none; border-radius: 10px; font-weight: bold; color: #fff; cursor: pointer; }
+    
+    .copyright-info { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px; margin-top: 10px; font-size: 11px; border-radius: 8px; text-align: center; }
+
+    .copy-section { max-width: 450px; margin: 0 auto 10px; background: #fff; padding: 12px; border-radius: 12px; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    .copy-section.show { display: block; }
+    .copy-item { display: flex; align-items: center; gap: 8px; background: #f8f9fa; padding: 8px; border-radius: 8px; border: 1px solid #e0e0e0; }
+    .copy-btn { padding: 8px 15px; background: #4a90e2; color: #fff; border: none; border-radius: 6px; font-size: 12px; font-weight: bold; }
+
+    /* --- 3. 其它功能样式 --- */
+    .module-card { background: #fff; border-radius: 12px; padding: 15px; margin-bottom: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+    .title { font-size: 15px; font-weight: bold; margin-bottom: 10px; border-left: 4px solid #4a90e2; padding-left: 8px; }
+    .weather-announce { background: #eef5ff; padding: 10px; border-radius: 8px; font-size: 13px; margin-bottom: 10px; }
+    .forecast-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .forecast-table td { padding: 8px; text-align: center; border-bottom: 1px solid #eee; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; background: #eee; border: 1px solid #eee; }
+    .cal-cell { background: #fff; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 14px; position: relative; }
+    .today-circle { background: #4a90e2; color: #fff; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
+    #stock-chart-container { flex: 1; width: 100%; }
+    .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #28a745; color: white; padding: 10px 20px; border-radius: 20px; z-index: 10000; opacity: 0; transition: 0.3s; pointer-events: none; }
+    .toast.show { opacity: 1; top: 40px; }
+</style>
+</head>
+<body>
+
+<div id="tab1" class="tab-content active">
+    <div class="controls no-print">
+        <div class="row">
+            <label>运输方式</label>
+            <select id="mode" onchange="toggleCustomMode()">
+                <option>大陆飞日本</option><option>香港飞日本</option><option>国际快递</option>
+                <option>普船海运GS</option><option>普船海运包税</option><option>快船包税</option>
+                <option>普船商业件</option><option>快船商业件</option><option>20呎整柜商业件</option>
+                <option>40呎整柜商业件</option>
+                <option value="CUSTOM">-- 手动输入自定义 --</option>
+            </select>
+            <div id="custom-mode-row"><input type="text" id="custom-mode-input" placeholder="输入名称"></div>
+        </div>
+        <div class="row">
+            <div style="display:flex; gap:10px;">
+                <div style="flex:1"><label>单号前缀</label><input type="text" id="prefix" value="HCN"></div>
+                <div style="flex:1"><label>生成件数</label><input type="number" id="qty" value="1"></div>
+            </div>
+        </div>
+        <div class="row">
+            <label>标签尺寸</label>
+            <select id="label-size">
+                <option value="100">100mm × 100mm (标准)</option>
+                <option value="80">80mm × 80mm (中型)</option>
+                <option value="50">100mm × 50mm (小型)</option>
+            </select>
+        </div>
+        <div class="row">
+            <label>码类型</label>
+            <select id="code-type">
+                <option value="barcode">条形码 (适合扫码枪)</option>
+                <option value="qrcode">二维码 (可含更多信息)</option>
+            </select>
+        </div>
+        <div class="btn-group">
+            <button class="btn-main" style="background:#4a90e2" onclick="handleGenerate()">1. 生成预览</button>
+            <button class="btn-main" style="background:#28a745" onclick="handleExport()">2. 导出 PDF</button>
+        </div>
+        <div class="copyright-info">
+            <div style="font-weight:bold">© HCN Supply Chain (Shenzhen) Co., Ltd.</div>
+            <div>📞 Joyhua 19867541192</div>
+        </div>
+    </div>
+    
+    <div class="copy-section" id="copySection">
+        <div id="copyButtons"></div>
+    </div>
+    
+    <div id="container"></div>
+</div>
+
+<div id="tab2" class="tab-content">
+    <div class="module-card">
+        <div class="title">🌤️ 深度天气气象台</div>
+        <div class="row" style="display:flex; gap:10px;">
+            <input type="text" id="city-input" placeholder="输入城市(如: 深圳)" style="flex:1">
+            <button onclick="getRichWeather()" style="width:80px; background:#4a90e2; color:#fff; border-radius:8px; border:none;">查询</button>
+        </div>
+        <div id="weather-detail-box">
+            <div class="temp-big" id="w-temp">--°C</div>
+            <div id="w-desc" style="text-align:center; margin-bottom:15px; font-weight:bold;">请查询</div>
+            <div class="weather-grid">
+                <div class="weather-item">🌬️ 风向: <span id="w-wind">--</span></div>
+                <div class="weather-item">💧 湿度: <span id="w-hum">--</span></div>
+                <div class="weather-item">🧭 气压: <span id="w-pres">--</span></div>
+                <div class="weather-item">🌅 日出: <span id="w-sunr">--</span></div>
+                <div class="weather-item">🌇 日落: <span id="w-suns">--</span></div>
+                <div class="weather-item">📏 能见度: <span id="w-vis">--</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="tab3" class="tab-content">
+    <div class="module-card">
+        <div class="title">汇率转换</div>
+        <input type="number" id="val-left" value="100" oninput="convertRate('left')" style="font-size:24px; text-align:center; margin-bottom:10px;">
+        <select id="cur-left" onchange="convertRate('left')" style="margin-bottom:15px;">
+           <option value="CNY">CNY人民币</option> 
+<option value="USD">USD 美元</option> <option value="EUR">EUR 欧元</option> <option value="GBP">GBP 英镑</option> <option value="AUD">AUD 澳元</option> <option value="JPY">JPY 日元</option>
+            <option value="CNY" selected>CNY 人民币</option>
+        </select>
+        <div style="text-align:center; font-size:30px; color:#4a90e2;">⇅</div>
+        <input type="number" id="val-right" oninput="convertRate('right')" style="font-size:24px; text-align:center; margin-bottom:10px;">
+        <select id="cur-right" onchange="convertRate('right')">
+           <option value="JPY">JPY 日币</option> 
+<option value="USD">USD 美元</option> <option value="EUR">EUR 欧元</option> <option value="GBP">GBP 英镑</option> <option value="AUD">AUD 澳元</option> <option value="CNY">CNY 人民币</option>
+        </select>
+    </div>
+</div>
+
+<div id="tab4" class="tab-content">
+    <div class="module-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <button onclick="changeMonth(-1)" style="border:none; background:none; font-size:20px;">◀</button>
+            <div id="cal-month-title" style="font-weight:bold;"></div>
+            <button onclick="changeMonth(1)" style="border:none; background:none; font-size:20px;">▶</button>
+        </div>
+        <div class="cal-grid" id="calendar-grid"></div>
+        <div id="today-display" style="text-align:center; margin-top:15px; color:#4a90e2; font-weight:bold;"></div>
+    </div>
+</div>
+
+<div id="tab5" class="tab-content">
+    <div style="padding:10px; background:#fff; border-bottom:1px solid #eee; display:flex; gap:5px;">
+        <input type="text" id="stock-search" placeholder="BINANCE:BTCUSDT" style="flex:1">
+        <button onclick="updateStockChart()" style="background:#4a90e2; color:#fff; border:none; padding:0 15px; border-radius:8px;">查看</button>
+    </div>
+    <div id="stock-chart-container"></div>
+</div>
+
+<div class="tab-bar">
+    <div class="tab-item active" onclick="switchTab(1)"><span class="tab-icon">🏷️</span><span>标签</span></div>
+    <div class="tab-item" onclick="switchTab(2)"><span class="tab-icon">🌤️</span><span>天气</span></div>
+    <div class="tab-item" onclick="switchTab(3)"><span class="tab-icon">💴</span><span>汇率</span></div>
+    <div class="tab-item" onclick="switchTab(4)"><span class="tab-icon">📅</span><span>日历</span></div>
+    <div class="tab-item" onclick="switchTab(5)"><span class="tab-icon">📈</span><span>行情</span></div>
+</div>
+
+<div id="toast" class="toast">操作成功</div>
+<canvas id="temp-canvas" style="display:none;"></canvas>
+<div id="temp-qrcode" style="display:none;"></div>
+
+<script>
+let fileNameData = { mode: "", sn: "" };
+let generatedData = [];
+
+// 1. 导航逻辑
+function switchTab(idx) {
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.tab-item').forEach(i => i.classList.remove('active'));
+    document.getElementById('tab' + idx).classList.add('active');
+    document.querySelectorAll('.tab-item')[idx-1].classList.add('active');
+    if(idx === 3) initRates();
+    if(idx === 4) initCalendar();
+    if(idx === 5) setTimeout(updateStockChart, 100);
+}
+
+// 2. 标签核心逻辑
+function toggleCustomMode() {
+    const s = document.getElementById('mode');
+    document.getElementById('custom-mode-row').style.display = (s.value === "CUSTOM") ? "block" : "none";
+}
+
+function handleGenerate() {
+    const qty = parseInt(document.getElementById('qty').value) || 1;
+    const prefix = document.getElementById('prefix').value || "HCN";
+    const modeSelect = document.getElementById('mode');
+    const modeText = (modeSelect.value === "CUSTOM") ? document.getElementById('custom-mode-input').value : modeSelect.options[modeSelect.selectedIndex].text;
+    const labelSize = document.getElementById('label-size').value;
+    const codeType = document.getElementById('code-type').value;
+    const container = document.getElementById('container');
+    
+    container.classList.remove('export-mode');
+    container.innerHTML = '';
+    
+    if (labelSize === '100') container.style.width = '100mm';
+    else if (labelSize === '80') container.style.width = '80mm';
+    else if (labelSize === '50') container.style.width = '100mm';
+    
+    const dateStr = new Date().toISOString().slice(2,10).replace(/-/g,'');
+    const randomSuffix = Math.floor(Math.random() * 9000 + 1000);
+    fileNameData.mode = modeText;
+    fileNameData.sn = `${prefix}${dateStr}${randomSuffix}`;
+    generatedData = [];
+
+    for(let i=1; i<=qty; i++) {
+        const tracking = `${prefix}${dateStr}${randomSuffix}${i}`;
+        const barcodeData = `${tracking}-${i}/${qty}`;
+        generatedData.push({ mode: modeText, tracking: tracking });
+        
+        let codeHTML = '';
+        if (codeType === 'barcode') {
+            const tempCanvas = document.getElementById('temp-canvas');
+            let bw = 3.5, bh = 150;
+            if (labelSize === '80') { bw = 3; bh = 120; }
+            else if (labelSize === '50') { bw = 2.5; bh = 80; }
+            JsBarcode(tempCanvas, barcodeData, { format: "CODE128", width: bw, height: bh, displayValue: false, margin: 10 });
+            codeHTML = `<img src="${tempCanvas.toDataURL("image/png")}" class="barcode-img">`;
+        } else {
+            const tempQR = document.getElementById('temp-qrcode');
+            tempQR.innerHTML = '';
+            let qrSize = labelSize === '100' ? 180 : (labelSize === '80' ? 150 : 100);
+            new QRCode(tempQR, { text: barcodeData, width: qrSize, height: qrSize });
+            codeHTML = `<div class="qrcode-container"><img src="${tempQR.querySelector('canvas').toDataURL()}" style="width:${qrSize}px"></div>`;
+        }
+
+        const wrapper = document.createElement('div');
+        wrapper.className = `page-wrapper size-${labelSize}`;
+        wrapper.innerHTML = `
+            <div class="label-content size-${labelSize}">
+                <div class="header-mode">${modeText}</div>
+                <div class="mid-info">
+                    <div class="big-qty">${i} / ${qty}</div>
+                    <span class="big-tracking">${tracking}</span>
+                </div>
+                <div class="barcode-area">${codeHTML}</div>
+                <div class="footer-made">MADE IN CHINA</div>
+            </div>
+        `;
+        container.appendChild(wrapper);
+    }
+    updateCopyButtons();
+}
+
+function updateCopyButtons() {
+    const sec = document.getElementById('copySection');
+    const box = document.getElementById('copyButtons');
+    if (generatedData.length === 0) return;
+    sec.classList.add('show');
+    const first = generatedData[0];
+    const trackPrefix = first.tracking.slice(0, -1);
+    const text = `${first.mode} ${trackPrefix} ${generatedData.length}件`;
+    box.innerHTML = `<div class="copy-item">
+        <div style="flex:1; font-size:12px"><b>快速信息</b>: ${text}</div>
+        <button class="copy-btn" onclick="copyTxt('${text}')">复制</button>
+    </div>`;
+}
+
+function copyTxt(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        const t = document.getElementById('toast');
+        t.innerText = "复制成功！";
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2000);
+    });
+}
+
+// 3. 高清 PDF 导出逻辑
+async function handleExport() {
+    const container = document.getElementById('container');
+    const pages = container.querySelectorAll('.page-wrapper');
+    if(pages.length === 0) return alert("请先生成预览");
+
+    const labelSize = document.getElementById('label-size').value;
+    let pdfWidth, pdfHeight;
+    if (labelSize === '100') { pdfWidth = pdfHeight = 100; } 
+    else if (labelSize === '80') { pdfWidth = pdfHeight = 80; } 
+    else if (labelSize === '50') { pdfWidth = 100; pdfHeight = 50; }
+
+    const exportBtn = document.querySelector('button[onclick="handleExport()"]');
+    exportBtn.innerText = "正在导出高清PDF...";
+    exportBtn.disabled = true;
+    container.classList.add('export-mode');
+
+    try {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+            unit: 'mm',
+            format: [pdfWidth, pdfHeight],
+            orientation: pdfWidth > pdfHeight ? 'l' : 'p',
+            compress: true
+        });
+
+        for (let i = 0; i < pages.length; i++) {
+            const canvas = await html2canvas(pages[i], {
+                scale: 3, 
+                useCORS: true,
+                backgroundColor: '#ffffff',
+                logging: false,
+                width: pages[i].offsetWidth,
+                height: pages[i].offsetHeight
+            });
+
+            const imgData = canvas.toDataURL('image/jpeg', 1.0);
+            if (i > 0) pdf.addPage([pdfWidth, pdfHeight]);
+            pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+        }
+
+        const fileName = `${fileNameData.mode}_${fileNameData.sn}.pdf`;
+        const pdfBlob = pdf.output('blob');
+        const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
+
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+            await navigator.share({ files: [pdfFile], title: 'HCN 物流标签' });
+        } else {
+            pdf.save(fileName);
+        }
+
+        const t = document.getElementById('toast');
+        t.innerText = "PDF 导出成功";
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2000);
+
+    } catch (err) {
+        alert("导出失败: " + err.message);
+    } finally {
+        container.classList.remove('export-mode');
+        exportBtn.innerText = "2. 导出 PDF";
+        exportBtn.disabled = false;
+    }
+}
+
+// 4. 其他模块逻辑 (汇率/天气/日历/行情)
+let rates = {};
+async function initRates() {
+    const res = await fetch('https://open.er-api.com/v6/latest/USD');
+    const data = await res.json();
+    rates = data.rates;
+    convertRate('left');
+}
+function convertRate(dir) {
+    const from = document.getElementById('cur-left').value, to = document.getElementById('cur-right').value;
+    const l = document.getElementById('val-left'), r = document.getElementById('val-right');
+    if(dir==='left') r.value = (l.value / rates[from] * rates[to]).toFixed(2);
+    else l.value = (r.value / rates[to] * rates[from]).toFixed(2);
+}
+
+async function getRichWeather() {
+    const city = document.getElementById('city-input').value || '深圳';
+    const res = await fetch(`https://wttr.in/${city}?format=j1&lang=zh`);
+    const data = await res.json();
+    const cur = data.current_condition[0];
+    document.getElementById('weather-announcement').innerText = `${city}: ${cur.lang_zh[0].value} ${cur.temp_C}°C`;
+    const body = document.getElementById('forecast-body');
+    body.innerHTML = '';
+    data.weather.slice(0, 5).forEach(w => {
+        body.innerHTML += `<tr><td>${w.date}</td><td>${w.hourly[4].lang_zh[0].value}</td><td>${w.maxtempC}°/${w.mintempC}°</td></tr>`;
+    });
+}
+
+let currDate = new Date();
+function initCalendar() {
+    const grid = document.getElementById('calendar-grid');
+    grid.innerHTML = '';
+    document.getElementById('cal-month-title').innerText = `${currDate.getFullYear()}年 ${currDate.getMonth()+1}月`;
+    const today = new Date();
+    ['日','一','二','三','四','五','六'].forEach(d => grid.innerHTML += `<div class="cal-cell" style="font-weight:bold;background:#f8f9fa;height:30px">${d}</div>`);
+    const firstDay = new Date(currDate.getFullYear(), currDate.getMonth(), 1).getDay();
+    const lastDate = new Date(currDate.getFullYear(), currDate.getMonth() + 1, 0).getDate();
+    for(let i=0; i<firstDay; i++) grid.innerHTML += `<div class="cal-cell"></div>`;
+    for(let d=1; d<=lastDate; d++) {
+        const isToday = d === today.getDate() && currDate.getMonth() === today.getMonth();
+        grid.innerHTML += `<div class="cal-cell"><span class="${isToday?'today-circle':''}">${d}</span></div>`;
+    }
+}
+function changeMonth(s) { currDate.setMonth(currDate.getMonth()+s); initCalendar(); }
+
+// 行情逻辑修改：默认添加 RSI 指标
+function updateStockChart() {
+    const sym = document.getElementById('stock-search').value || "BINANCE:BTCUSDT";
+    document.getElementById('stock-chart-container').innerHTML = '';
+    new TradingView.widget({
+        "autosize": true,
+        "symbol": sym,
+        "interval": "30",
+        "timezone": "Asia/Shanghai",
+        "theme": "light",
+        "style": "1",
+        "locale": "zh_CN",
+        "container_id": "stock-chart-container",
+        "studies": ["RSI@tv-basicstudies"] // 关键修改：默认开启 RSI 指标
+    });
+}
+</script>
+</body>
+</html>
