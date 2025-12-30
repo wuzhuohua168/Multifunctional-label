@@ -99,18 +99,19 @@
         <div class="row">
             <label>运输方式</label>
             <select id="mode" onchange="toggleCustomMode()">
-                <option>大陆飞日本</option><option>香港飞日本</option><option>国际快递</option>
+                <option>大陆飞日本🇯🇵</option><option>香港飞日本🇯🇵</option><option>国际快递</option>
                 <option>普船海运GS</option><option>普船海运包税</option><option>快船包税</option>
                 <option>普船商业件</option><option>快船商业件</option><option>20呎整柜商业件</option>
                 <option>40呎整柜商业件</option>
+                  <option>日本🇯🇵回国</option>
                 <option value="CUSTOM">-- 手动输入自定义 --</option>
             </select>
             <div id="custom-mode-row"><input type="text" id="custom-mode-input" placeholder="输入名称"></div>
         </div>
         <div class="row">
             <div style="display:flex; gap:10px;">
-                <div style="flex:1"><label>单号前缀</label><input type="text" id="prefix" value="HCN"></div>
-                <div style="flex:1"><label>生成件数</label><input type="number" id="qty" value="1"></div>
+                <div style="flex:1"><label>单号前缀</label><input type="text" id="prefix" value="HCN-"></div>
+                <div style="flex:1"><label>发出件数</label><input type="number" id="qty" value=" "></div>
             </div>
         </div>
         <div class="row">
@@ -129,12 +130,12 @@
             </select>
         </div>
         <div class="btn-group">
-            <button class="btn-main" style="background:#4a90e2" onclick="handleGenerate()">1. 生成预览</button>
-            <button class="btn-main" style="background:#28a745" onclick="handleExport()">2. 导出 PDF</button>
+            <button class="btn-main" style="background:#4a90e2" onclick="handleGenerate()">1. 预览</button>
+            <button class="btn-main" style="background:#28a745" onclick="handleExport()">2. 导出标签🏷️</button>
         </div>
         <div class="copyright-info">
             <div style="font-weight:bold">© HCN Supply Chain (Shenzhen) Co., Ltd.</div>
-            <div>📞 Joyhua 19867541192</div>
+            <div>日本跨境物流联系📞 Joyhua 19867541192</div>
         </div>
     </div>
     
