@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HCN多功能工作台 Pro</title>
+    <title>HCN全能工作台 Pro</title>
 
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://s3.tradingview.com/tv.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.js"></script>
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -53,8 +54,30 @@
         .temp-big { font-size: 48px; font-weight: bold; text-align: center; color: #4a90e2; margin: 10px 0; }
         .weather-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .weather-item { background: #f8f9fa; padding: 10px; border-radius: 8px; font-size: 13px; }
+
+        /* --- 日历模块增强样式 --- */
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; background: #eee; }
-        .cal-cell { background: #fff; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .cal-cell { 
+            background: #fff; 
+            height: 60px; /* 增加高度显示农历 */
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 14px; 
+            position: relative;
+            cursor: pointer;
+        }
+        .lunar-text { font-size: 10px; color: #999; margin-top: 2px; }
+        .weekend-text { color: #e74c3c; } /* 周末文字颜色 */
+        .event-dot { 
+            position: absolute; 
+            bottom: 4px; 
+            width: 4px; 
+            height: 4px; 
+            background: #4a90e2; 
+            border-radius: 50%; 
+        }
         .today-circle { background: #4a90e2; color: #fff; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
 
         .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); color: white; padding: 10px 20px; border-radius: 20px; z-index: 10000; opacity: 0; transition: 0.3s; pointer-events: none; font-size: 13px; }
@@ -171,6 +194,7 @@
             <button onclick="changeMonth(1)" style="border:none; background:none; font-size:20px;">▶</button>
         </div>
         <div class="cal-grid" id="calendar-grid"></div>
+        <div style="font-size: 11px; color:#999; margin-top:10px; text-align:center;">💡 点击日期添加备注，有备注日期显示圆点</div>
     </div>
 </div>
 
@@ -198,8 +222,9 @@
 let lastBatchData = null;
 let currDate = new Date();
 let rates = {};
+// 备忘录数据初始化
+let memos = JSON.parse(localStorage.getItem('hcn_calendar_memos') || '{}');
 
-// 页面加载时就开始获取汇率，避免切换过去后数据没加载完
 window.onload = () => {
     initRates();
 };
@@ -298,25 +323,24 @@ function handleExportCSV() {
     link.click();
 }
 
-// --- 汇率转换逻辑：修复后的核心逻辑 ---
+// --- 汇率转换逻辑 ---
 async function initRates() {
     try {
         const res = await fetch('https://open.er-api.com/v6/latest/USD');
         const data = await res.json();
         if(data && data.rates) {
             rates = data.rates;
-            convertRate('left'); // 数据加载成功后自动算一次
+            convertRate('left');
         }
     } catch(e) { console.error("汇率加载失败"); }
 }
 
 function convertRate(dir) {
-    if(!rates || Object.keys(rates).length === 0) return; // 数据没加载完不执行
+    if(!rates || Object.keys(rates).length === 0) return;
     const from = document.getElementById('cur-left').value;
     const to = document.getElementById('cur-right').value;
     const l = document.getElementById('val-left');
     const r = document.getElementById('val-right');
-    
     if(dir === 'left') {
         r.value = (l.value / rates[from] * rates[to]).toFixed(2);
     } else {
@@ -324,7 +348,7 @@ function convertRate(dir) {
     }
 }
 
-// --- 其他功能 ---
+// --- 天气 ---
 async function getRichWeather() {
     const city = document.getElementById('city-input').value.trim() || 'Shenzhen';
     try {
@@ -338,21 +362,70 @@ async function getRichWeather() {
     } catch (e) { alert("查询失败"); }
 }
 
+// --- 精准修改后的增强日历逻辑 ---
 function initCalendar() {
     const grid = document.getElementById('calendar-grid');
     grid.innerHTML = '';
-    document.getElementById('cal-month-title').innerText = `${currDate.getFullYear()}年 ${currDate.getMonth()+1}月`;
-    ['日','一','二','三','四','五','六'].forEach(d => grid.innerHTML += `<div class="cal-cell" style="font-weight:bold;background:#f8f9fa;height:35px">${d}</div>`);
-    const firstDay = new Date(currDate.getFullYear(), currDate.getMonth(), 1).getDay();
-    const daysInMonth = new Date(currDate.getFullYear(), currDate.getMonth()+1, 0).getDate();
+    const year = currDate.getFullYear();
+    const month = currDate.getMonth();
+    
+    document.getElementById('cal-month-title').innerText = `${year}年 ${month + 1}月`;
+    
+    // 星期表头（标注周末颜色）
+    const weekLabels = ['日','一','二','三','四','五','六'];
+    weekLabels.forEach((label, i) => {
+        const colorClass = (i === 0 || i === 6) ? 'weekend-text' : '';
+        grid.innerHTML += `<div class="cal-cell ${colorClass}" style="font-weight:bold;background:#f8f9fa;height:35px">${label}</div>`;
+    });
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    // 空白填充
     for(let i=0; i<firstDay; i++) grid.innerHTML += `<div class="cal-cell"></div>`;
+
+    // 填充具体日期
     for(let d=1; d<=daysInMonth; d++) {
-        const isToday = new Date().toDateString() === new Date(currDate.getFullYear(), currDate.getMonth(), d).toDateString();
-        grid.innerHTML += `<div class="cal-cell">${isToday ? `<div class="today-circle">${d}</div>` : d}</div>`;
+        const dateKey = `${year}-${month+1}-${d}`;
+        const dayOfWeek = new Date(year, month, d).getDay();
+        const isToday = new Date().toDateString() === new Date(year, month, d).toDateString();
+        const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+        
+        // 农历支持
+        const lunarDate = Lunar.fromDate(new Date(year, month, d));
+        let lunarTxt = lunarDate.getJieQi() || lunarDate.getDayInChinese();
+        if(lunarTxt === '初一') lunarTxt = lunarDate.getMonthInChinese() + '月';
+
+        const cell = document.createElement('div');
+        cell.className = `cal-cell ${isWeekend ? 'weekend-text' : ''}`;
+        cell.onclick = () => handleDateClick(dateKey);
+
+        let content = isToday ? `<div class="today-circle">${d}</div>` : `<span>${d}</span>`;
+        content += `<div class="lunar-text">${lunarTxt}</div>`;
+        if(memos[dateKey]) content += `<div class="event-dot"></div>`;
+        
+        cell.innerHTML = content;
+        grid.appendChild(cell);
     }
 }
-function changeMonth(delta) { currDate.setMonth(currDate.getMonth() + delta); initCalendar(); }
 
+function handleDateClick(dateKey) {
+    const oldMemo = memos[dateKey] || "";
+    const newMemo = prompt(`${dateKey} 备注：\n(输入空则清除)`, oldMemo);
+    if(newMemo !== null) {
+        if(newMemo.trim() === "") delete memos[dateKey];
+        else memos[dateKey] = newMemo;
+        localStorage.setItem('hcn_calendar_memos', JSON.stringify(memos));
+        initCalendar();
+    }
+}
+
+function changeMonth(delta) { 
+    currDate.setMonth(currDate.getMonth() + delta); 
+    initCalendar(); 
+}
+
+// --- 行情 ---
 function updateStockChart() {
     const symbol = document.getElementById('stock-search').value || "300446";
     document.getElementById('stock-chart-container').innerHTML = '';
