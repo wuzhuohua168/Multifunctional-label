@@ -354,7 +354,7 @@ function initCalendar() {
 function changeMonth(delta) { currDate.setMonth(currDate.getMonth() + delta); initCalendar(); }
 
 function updateStockChart() {
-    const symbol = document.getElementById('stock-search').value || "601168";
+    const symbol = document.getElementById('stock-search').value || "300446";
     document.getElementById('stock-chart-container').innerHTML = '';
     new TradingView.widget({
         "autosize": true,
