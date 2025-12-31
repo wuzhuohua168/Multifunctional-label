@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HCN 业务综合工作台 Pro</title>
+    <title>HCN多功能工作台 Pro</title>
 
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -17,7 +17,6 @@
         
         .tab-content { display: none; padding: 10px; flex: 1; overflow-y: auto; padding-bottom: 80px; }
         .tab-content.active { display: block; }
-        /* 行情栏特殊处理：全屏且无内边距 */
         #tab5 { padding: 0; overflow: hidden; }
 
         .tab-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: #fff; display: flex; border-top: 1px solid #e0e0e0; z-index: 9999; }
@@ -25,7 +24,6 @@
         .tab-item.active { color: #4a90e2; font-weight: bold; }
         .tab-icon { font-size: 20px; margin-bottom: 2px; }
 
-        /* 标签 Pro 样式 */
         .controls { max-width: 500px; margin: 0 auto 15px; background: #fff; padding: 18px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
         .row { margin-bottom: 12px; }
         label { font-size: 12px; font-weight: bold; color: #666; display: block; margin-bottom: 5px; }
@@ -50,7 +48,6 @@
         .qrcode-img { height: 100%; width: auto; max-height: 130px; }
         .footer-made { width: 100%; border: 2px solid #000; text-align: center; font-size: 16px; font-weight: bold; padding: 1mm; }
 
-        /* 模块卡片 */
         .module-card { background: #fff; border-radius: 12px; padding: 15px; margin-bottom: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
         .title { font-size: 15px; font-weight: bold; margin-bottom: 10px; border-left: 4px solid #4a90e2; padding-left: 8px; }
         .temp-big { font-size: 48px; font-weight: bold; text-align: center; color: #4a90e2; margin: 10px 0; }
@@ -84,21 +81,8 @@
             <input type="text" id="custom-mode-input" placeholder="输入运输方式" style="display:none; margin-top:8px;">
         </div>
         <div style="display:flex; gap:10px;" class="row">
-            <div style="flex:1">
-                <label>纸张格式</label>
-                <select id="label-size">
-                    <option value="size-100-100">100mm x 100mm</option>
-                    <option value="size-100-50">100mm x 50mm</option>
-                    <option value="size-80-80">80mm x 80mm</option>
-                </select>
-            </div>
-            <div style="flex:1">
-                <label>码制类型</label>
-                <select id="code-type">
-                    <option value="BARCODE">条形码</option>
-                    <option value="QRCODE">二维码</option>
-                </select>
-            </div>
+            <div style="flex:1"><label>纸张格式</label><select id="label-size"><option value="size-100-100">100mm x 100mm</option><option value="size-100-50">100mm x 50mm</option><option value="size-80-80">80mm x 80mm</option></select></div>
+            <div style="flex:1"><label>码制类型</label><select id="code-type"><option value="BARCODE">条形码</option><option value="QRCODE">二维码</option></select></div>
         </div>
         <div style="display:flex; gap:10px;">
             <div style="flex:1.5"><label>单号前缀</label><input type="text" id="prefix" value="HCN"></div>
@@ -144,37 +128,37 @@
         <input type="number" id="val-left" value="1000" oninput="convertRate('left')" style="font-size:24px; text-align:center; margin-bottom:10px;">
         <select id="cur-left" onchange="convertRate('left')" style="margin-bottom:15px;">
             <option value="JPY" selected>JPY 日币</option>
-           <option value="USD">USD 美元</option>
-<option value="EUR">EUR 欧元</option>
-<option value="CNY">CNY 人民币</option> 
-<option value="AUD">AUD 澳元</option> 
-<option value="GBP">GBP 英镑</option> 
-<option  value="NZD">NZD 纽元</option>
-<option value="CAD">CAD 加元</option> 
-<option  value="TWD">TWD 新台币</option> 
-<option value="HKD">HKD 港元</option> 
-<option value="KRW">KRW 韩元</option> 
-<option value="CHF">CHF 瑞士法郎</option> 
-<option value="THB">THB 泰铢</option> 
-<option value="SGD">SGD 新加坡元</option>
+            <option value="USD">USD 美元</option>
+            <option value="EUR">EUR 欧元</option>
+            <option value="CNY">CNY 人民币</option> 
+            <option value="AUD">AUD 澳元</option> 
+            <option value="GBP">GBP 英镑</option> 
+            <option value="NZD">NZD 纽元</option>
+            <option value="CAD">CAD 加元</option> 
+            <option value="TWD">TWD 新台币</option> 
+            <option value="HKD">HKD 港元</option> 
+            <option value="KRW">KRW 韩元</option> 
+            <option value="CHF">CHF 瑞士法郎</option> 
+            <option value="THB">THB 泰铢</option> 
+            <option value="SGD">SGD 新加坡元</option>
         </select>
         <div style="text-align:center; font-size:30px; color:#4a90e2; margin:10px 0;">⇅</div>
         <input type="number" id="val-right" oninput="convertRate('right')" style="font-size:24px; text-align:center; margin-bottom:10px;">
         <select id="cur-right" onchange="convertRate('right')">
-            <option value="CNY" selected>CNY 人民币<option 
-<option value="USD">USD 美元</option>
-<option value="EUR">EUR 欧元</option>
-<option value="JPY">JPY 日元</option> 
-<option value="AUD">AUD 澳元</option> 
-<option value="GBP">GBP 英镑</option> 
-<option  value="NZD">NZD 纽元</option>
-<option value="CAD">CAD 加元</option> 
-<option  value="TWD">TWD 新台币</option> 
-<option value="HKD">HKD 港元</option> 
-<option value="KRW">KRW 韩元</option> 
-<option value="CHF">CHF 瑞士法郎</option> 
-<option value="THB">THB 泰铢</option> 
-<option value="SGD">SGD 新加坡元</option>
+            <option value="CNY" selected>CNY 人民币</option> 
+            <option value="USD">USD 美元</option>
+            <option value="EUR">EUR 欧元</option>
+            <option value="JPY">JPY 日元</option> 
+            <option value="AUD">AUD 澳元</option> 
+            <option value="GBP">GBP 英镑</option> 
+            <option value="NZD">NZD 纽元</option>
+            <option value="CAD">CAD 加元</option> 
+            <option value="TWD">TWD 新台币</option> 
+            <option value="HKD">HKD 港元</option> 
+            <option value="KRW">KRW 韩元</option> 
+            <option value="CHF">CHF 瑞士法郎</option> 
+            <option value="THB">THB 泰铢</option> 
+            <option value="SGD">SGD 新加坡元</option>
         </select>
     </div>
 </div>
@@ -215,12 +199,16 @@ let lastBatchData = null;
 let currDate = new Date();
 let rates = {};
 
+// 页面加载时就开始获取汇率，避免切换过去后数据没加载完
+window.onload = () => {
+    initRates();
+};
+
 function switchTab(idx) {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.querySelectorAll('.tab-item').forEach(i => i.classList.remove('active'));
     document.getElementById('tab' + idx).classList.add('active');
     document.querySelectorAll('.tab-item')[idx-1].classList.add('active');
-    if(idx === 3) initRates();
     if(idx === 4) initCalendar();
     if(idx === 5) setTimeout(updateStockChart, 100);
 }
@@ -239,22 +227,18 @@ function handleGenerate() {
     const sizeClass = document.getElementById('label-size').value;
     const codeType = document.getElementById('code-type').value;
     const container = document.getElementById('container');
-    
     container.innerHTML = '';
     const now = new Date();
     const dateKey = now.toISOString().slice(2,10).replace(/-/g,'');
     const randomSuffix = Math.floor(Math.random() * 900 + 100);
     const mainTracking = `${prefix}${dateKey}${randomSuffix}`;
-
     lastBatchData = { mode: modeText, mainTracking: mainTracking, total: qty, date: now.toLocaleDateString(), size: sizeClass };
-
     for(let i=1; i<=qty; i++) {
         const displayLabel = `${i} / ${qty}`;
         const trackingWithCounter = `${mainTracking}-${i}`;
         const codeContent = `${trackingWithCounter} | ${displayLabel}`;
         const wrapper = document.createElement('div');
         wrapper.className = `page-wrapper ${sizeClass}`;
-        
         let codeDataUrl = '';
         if(codeType === 'BARCODE') {
             const tempCanvas = document.getElementById('temp-canvas');
@@ -266,16 +250,7 @@ function handleGenerate() {
             new QRCode(qrBox, { text: codeContent, width: 250, height: 250, correctLevel: QRCode.CorrectLevel.M });
             codeDataUrl = qrBox.querySelector('canvas').toDataURL('image/png');
         }
-
-        wrapper.innerHTML = `<div class="label-content">
-            <div class="header-mode">${modeText}</div>
-            <div style="text-align:center">
-                <div class="big-qty">${displayLabel}</div>
-                <div class="big-tracking">${trackingWithCounter}</div>
-            </div>
-            <div class="code-area"><img src="${codeDataUrl}" class="${codeType==='BARCODE'?'barcode-img':'qrcode-img'}"></div>
-            <div class="footer-made">MADE IN CHINA</div>
-        </div>`;
+        wrapper.innerHTML = `<div class="label-content"><div class="header-mode">${modeText}</div><div style="text-align:center"><div class="big-qty">${displayLabel}</div><div class="big-tracking">${trackingWithCounter}</div></div><div class="code-area"><img src="${codeDataUrl}" class="${codeType==='BARCODE'?'barcode-img':'qrcode-img'}"></div><div class="footer-made">MADE IN CHINA</div></div>`;
         container.appendChild(wrapper);
     }
     showToast("预览已生成");
@@ -286,9 +261,7 @@ async function handleExportPDF() {
     if(pages.length === 0) return alert("请先生成预览");
     const btn = document.getElementById('btn-share');
     btn.innerText = "生成中...";
-
     const dims = { 'size-100-100': [100, 100], 'size-100-50': [100, 50], 'size-80-80': [80, 80] }[lastBatchData.size];
-
     try {
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF({ unit: 'mm', format: dims, compress: true });
@@ -297,11 +270,9 @@ async function handleExportPDF() {
             if (i > 0) pdf.addPage(dims);
             pdf.addImage(canvas.toDataURL('image/jpeg', 0.8), 'JPEG', 0, 0, dims[0], dims[1], undefined, 'FAST');
         }
-        // Bug 修复：文件名添加总件数
         const fileName = `${lastBatchData.mode}_${lastBatchData.mainTracking}_${lastBatchData.total}件.pdf`;
         const pdfBlob = pdf.output('blob');
         const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
-
         if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
             await navigator.share({ files: [pdfFile], title: 'HCN物流标签' });
         } else {
@@ -327,7 +298,33 @@ function handleExportCSV() {
     link.click();
 }
 
-// --- 其他功能逻辑 ---
+// --- 汇率转换逻辑：修复后的核心逻辑 ---
+async function initRates() {
+    try {
+        const res = await fetch('https://open.er-api.com/v6/latest/USD');
+        const data = await res.json();
+        if(data && data.rates) {
+            rates = data.rates;
+            convertRate('left'); // 数据加载成功后自动算一次
+        }
+    } catch(e) { console.error("汇率加载失败"); }
+}
+
+function convertRate(dir) {
+    if(!rates || Object.keys(rates).length === 0) return; // 数据没加载完不执行
+    const from = document.getElementById('cur-left').value;
+    const to = document.getElementById('cur-right').value;
+    const l = document.getElementById('val-left');
+    const r = document.getElementById('val-right');
+    
+    if(dir === 'left') {
+        r.value = (l.value / rates[from] * rates[to]).toFixed(2);
+    } else {
+        l.value = (r.value / rates[to] * rates[from]).toFixed(2);
+    }
+}
+
+// --- 其他功能 ---
 async function getRichWeather() {
     const city = document.getElementById('city-input').value.trim() || 'Shenzhen';
     try {
@@ -339,22 +336,6 @@ async function getRichWeather() {
         document.getElementById('w-wind').innerText = `${cur.windspeedKmph} km/h`;
         document.getElementById('w-hum').innerText = `${cur.humidity}%`;
     } catch (e) { alert("查询失败"); }
-}
-
-async function initRates() {
-    try {
-        const res = await fetch('https://open.er-api.com/v6/latest/USD');
-        const data = await res.json();
-        rates = data.rates;
-        convertRate('left');
-    } catch(e) {}
-}
-function convertRate(dir) {
-    const from = document.getElementById('cur-left').value, to = document.getElementById('cur-right').value;
-    const l = document.getElementById('val-left'), r = document.getElementById('val-right');
-    if(!rates[from]) return;
-    if(dir==='left') r.value = (l.value / rates[from] * rates[to]).toFixed(2);
-    else l.value = (r.value / rates[to] * rates[from]).toFixed(2);
 }
 
 function initCalendar() {
@@ -372,7 +353,6 @@ function initCalendar() {
 }
 function changeMonth(delta) { currDate.setMonth(currDate.getMonth() + delta); initCalendar(); }
 
-// Bug 修复：行情满屏并添加 RSI
 function updateStockChart() {
     const symbol = document.getElementById('stock-search').value || "601168";
     document.getElementById('stock-chart-container').innerHTML = '';
@@ -389,9 +369,7 @@ function updateStockChart() {
         "hide_top_toolbar": false,
         "save_image": false,
         "container_id": "stock-chart-container",
-        "studies": [
-            "RSI@tv-basicstudies" // 默认添加 RSI
-        ]
+        "studies": ["RSI@tv-basicstudies"]
     });
 }
 
