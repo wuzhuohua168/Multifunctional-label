@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HCN工作台5.0 - 完整整合版</title>
+    <title>HCN工作台5.0 - 全功能完整版</title>
 
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -16,28 +16,20 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: #f0f3f7; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        
         .tab-content { display: none; padding: 10px; flex: 1; overflow-y: auto; padding-bottom: 80px; }
         .tab-content.active { display: block; }
         #tab5 { padding: 0; overflow: hidden; }
-
         .tab-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: #fff; display: flex; border-top: 1px solid #e0e0e0; z-index: 9999; }
         .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #8a8a8a; font-size: 10px; cursor: pointer; }
         .tab-item.active { color: #4a90e2; font-weight: bold; }
         .tab-icon { font-size: 20px; margin-bottom: 2px; }
-
-        /* 统一卡片样式 */
         .module-card { background: #fff; border-radius: 12px; padding: 15px; margin-bottom: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
         .controls { max-width: 500px; margin: 0 auto 15px; background: #fff; padding: 18px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
-        
         .row { margin-bottom: 12px; }
         label { font-size: 12px; font-weight: bold; color: #666; display: block; margin-bottom: 5px; }
         input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; outline: none; background: #fff; }
-        
         .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 15px; }
         .btn-main { padding: 12px 5px; border: none; border-radius: 8px; font-weight: bold; color: #fff; cursor: pointer; font-size: 13px; text-align: center; }
-        
-        /* 标签内容样式 */
         #container { margin: 15px auto; display: flex; flex-direction: column; align-items: center; }
         .page-wrapper { background: #fff; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-bottom: 12px; overflow: hidden; position: relative; border: 0.1px solid #eee; }
         .size-100-100 { width: 100mm; height: 100mm; }
@@ -51,19 +43,15 @@
         .barcode-img { max-width: 100%; height: auto; }
         .qrcode-img { height: 100%; width: auto; max-height: 130px; }
         .footer-made { width: 100%; border: 2px solid #000; text-align: center; font-size: 16px; font-weight: bold; padding: 1mm; }
-
         .title { font-size: 15px; font-weight: bold; margin-bottom: 10px; border-left: 4px solid #4a90e2; padding-left: 8px; }
         .temp-big { font-size: 48px; font-weight: bold; text-align: center; color: #4a90e2; margin: 10px 0; }
         .weather-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .weather-item { background: #f8f9fa; padding: 10px; border-radius: 8px; font-size: 13px; }
-
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; background: #eee; }
         .cal-cell { background: #fff; height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 14px; position: relative; cursor: pointer; }
         .lunar-text { font-size: 10px; color: #999; margin-top: 2px; }
-        .weekend-text { color: #e74c3c; }
         .event-dot { position: absolute; bottom: 4px; width: 4px; height: 4px; background: #4a90e2; border-radius: 50%; }
         .today-circle { background: #4a90e2; color: #fff; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
-
         .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); color: white; padding: 10px 20px; border-radius: 20px; z-index: 10000; opacity: 0; transition: 0.3s; pointer-events: none; font-size: 13px; }
         .toast.show { opacity: 1; top: 30px; }
         .copyright-info { background: #FFD700; color: #333; padding: 10px; margin-top: 15px; font-size: 11px; border-radius: 8px; text-align: center; line-height: 1.4; border: 1px solid #DAA520; }
@@ -99,8 +87,8 @@
         <div class="btn-group">
             <button class="btn-main" style="background:#4a90e2" onclick="handleGenerate()">1. 预览标签</button>
             <button class="btn-main" style="background:#6c5ce7" onclick="copyInfo()">2. 复制信息</button>
-            <button class="btn-main" style="background:#28a745" id="btn-share" onclick="handleExportPDF()">3. 分享/下载 PDF</button>
-            <button class="btn-main" style="background:#f39c12" onclick="handleExportCSV()">4. 导出 CSV</button>
+            <button class="btn-main" style="background:#28a745" id="btn-share-pdf" onclick="handleExportPDF()">3. 分享/下载 PDF</button>
+            <button class="btn-main" style="background:#f39c12" id="btn-share-csv" onclick="handleExportCSV()">4. 导出 CSV</button>
         </div>
         <div class="copyright-info">
             <div style="font-weight:bold; color: #000;">© HCN Supply Chain (Shenzhen) Co., Ltd.</div>
@@ -135,20 +123,38 @@
         <div class="title">汇率转换</div>
         <input type="number" id="val-left" value="1000" oninput="convertRate('left')" style="font-size:24px; text-align:center; margin-bottom:10px;">
         <select id="cur-left" onchange="convertRate('left')" style="margin-bottom:15px;">
-            <option value="JPY" selected>JPY 日币</option><option value="USD">USD 美元</option><option value="EUR">EUR 欧元</option>
-            <option value="CNY">CNY 人民币</option><option value="AUD">AUD 澳元</option><option value="GBP">GBP 英镑</option>
-            <option value="NZD">NZD 纽元</option><option value="CAD">CAD 加元</option><option value="TWD">TWD 新台币</option>
-            <option value="HKD">HKD 港元</option><option value="KRW">KRW 韩元</option><option value="CHF">CHF 瑞士法郎</option>
-            <option value="THB">THB 泰铢</option><option value="SGD">SGD 新加坡元</option>
+            <option value="JPY" selected>JPY 日币</option>
+            <option value="CNY">CNY 人民币</option>
+            <option value="USD">USD 美元</option>
+            <option value="EUR">EUR 欧元</option>
+            <option value="HKD">HKD 港元</option>
+            <option value="TWD">TWD 新台币</option>
+            <option value="KRW">KRW 韩元</option>
+            <option value="THB">THB 泰铢</option>
+            <option value="GBP">GBP 英镑</option>
+            <option value="AUD">AUD 澳元</option>
+            <option value="CAD">CAD 加元</option>
+            <option value="SGD">SGD 新加坡元</option>
+            <option value="CHF">CHF 瑞士法郎</option>
+            <option value="NZD">NZD 纽元</option>
         </select>
         <div style="text-align:center; font-size:30px; color:#4a90e2; margin:10px 0;">⇅</div>
         <input type="number" id="val-right" oninput="convertRate('right')" style="font-size:24px; text-align:center; margin-bottom:10px;">
         <select id="cur-right" onchange="convertRate('right')">
-            <option value="CNY" selected>CNY 人民币</option><option value="USD">USD 美元</option><option value="EUR">EUR 欧元</option>
-            <option value="JPY">JPY 日元</option><option value="AUD">AUD 澳元</option><option value="GBP">GBP 英镑</option>
-            <option value="NZD">NZD 纽元</option><option value="CAD">CAD 加元</option><option value="TWD">TWD 新台币</option>
-            <option value="HKD">HKD 港元</option><option value="KRW">KRW 韩元</option><option value="CHF">CHF 瑞士法郎</option>
-            <option value="THB">THB 泰铢</option><option value="SGD">SGD 新加坡元</option>
+            <option value="CNY" selected>CNY 人民币</option>
+            <option value="JPY">JPY 日币</option>
+            <option value="USD">USD 美元</option>
+            <option value="EUR">EUR 欧元</option>
+            <option value="HKD">HKD 港元</option>
+            <option value="TWD">TWD 新台币</option>
+            <option value="KRW">KRW 韩元</option>
+            <option value="THB">THB 泰铢</option>
+            <option value="GBP">GBP 英镑</option>
+            <option value="AUD">AUD 澳元</option>
+            <option value="CAD">CAD 加元</option>
+            <option value="SGD">SGD 新加坡元</option>
+            <option value="CHF">CHF 瑞士法郎</option>
+            <option value="NZD">NZD 纽元</option>
         </select>
     </div>
 </div>
@@ -161,7 +167,6 @@
             <button onclick="changeMonth(1)" style="border:none; background:none; font-size:20px;">▶</button>
         </div>
         <div class="cal-grid" id="calendar-grid"></div>
-        <div style="font-size: 11px; color:#999; margin-top:10px; text-align:center;">💡 点击日期添加备注，有备注日期显示圆点</div>
     </div>
 </div>
 
@@ -181,38 +186,21 @@
             <label>邮政区号 (7位数字自动查询)</label>
             <input type="text" id="zip-jp" class="p-postal-code" placeholder="例：1000001">
         </div>
-        <div class="row">
-            <label>都道府县</label>
-            <input type="text" id="region-jp" class="p-region" readonly>
+        <div class="row"><label>地址详情</label>
+            <input type="text" id="region-jp" class="p-region" placeholder="都道府县" readonly>
+            <input type="text" id="locality-jp" class="p-locality" placeholder="市区町村" readonly>
+            <input type="text" id="street-jp" class="p-street-address" placeholder="街道">
         </div>
-        <div class="row">
-            <label>市区町村</label>
-            <input type="text" id="locality-jp" class="p-locality" readonly>
-        </div>
-        <div class="row">
-            <label>详细街道</label>
-            <input type="text" id="street-jp" class="p-street-address">
-        </div>
-        <div class="btn-group">
-            <button class="btn-main" style="background:#27ae60; grid-column: span 2;" onclick="copyJpAddress()">复制完整地址</button>
-        </div>
+        <button class="btn-main" style="background:#27ae60; width:100%;" onclick="copyJpAddress()">复制完整地址</button>
     </div>
 </div>
 
 <div id="tab7" class="tab-content">
     <div class="module-card">
         <div class="title">🎬 视频下载助手</div>
-        <p style="text-align: center; color: #888; font-size:13px; margin-bottom:10px;">支持 YouTube, Twitter, TikTok 等</p>
-        <input type="text" id="videoUrlInput" placeholder="在此粘贴视频链接 (YouTube/Twitter)...">
-        <button onclick="handleVideoDownload()" style="width:100%; padding: 12px; background: #ff0000; color: white; border: none; border-radius: 8px; margin-top:10px; font-weight:bold;">解析并下载</button>
-        <div id="v-status" style="margin-top: 15px; text-align: center; color: #d9534f; font-weight: bold;"></div>
-        <div style="margin-top: 20px; font-size: 13px; color: #666; background:#f9f9f9; padding:10px; border-radius:8px;">
-            <strong>提示：</strong>
-            <ul style="margin-left:20px;">
-                <li>跳转至第三方解析页面后可选择清晰度。</li>
-                <li>支持 MP3 或 MP4 格式导出。</li>
-            </ul>
-        </div>
+        <input type="text" id="videoUrlInput" placeholder="在此粘贴视频链接...">
+        <button onclick="handleVideoDownload()" style="width:100%; padding: 12px; background: #ff0000; color: white; border: none; border-radius: 8px; margin-top:10px; font-weight:bold;">立即解析下载</button>
+        <div id="v-status" style="margin-top: 15px; text-align: center; font-size: 14px; font-weight: bold;"></div>
     </div>
 </div>
 
@@ -231,10 +219,8 @@
 <div id="qr-gen-box" style="display:none;"></div>
 
 <script>
-let lastBatchData = null;
-let currDate = new Date();
-let rates = {};
-let memos = JSON.parse(localStorage.getItem('hcn_calendar_memos') || '{}');
+var lastBatchData = null;
+let currDate = new Date(), rates = {}, memos = JSON.parse(localStorage.getItem('hcn_calendar_memos') || '{}');
 
 window.onload = () => { initRates(); };
 
@@ -247,120 +233,81 @@ function switchTab(idx) {
     if(idx === 5) setTimeout(updateStockChart, 100);
 }
 
-// --- 视频下载逻辑 ---
-function handleVideoDownload() {
-    const url = document.getElementById('videoUrlInput').value;
-    const status = document.getElementById('v-status');
-    if (!url) { status.innerText = "请输入有效的视频链接！"; return; }
-    status.innerText = "正在跳转解析...";
-    const provider = "https://9xbuddy.com/process?url=";
-    setTimeout(() => {
-        window.open(provider + encodeURIComponent(url), '_blank');
-        status.innerText = "";
-    }, 1000);
-}
-
-// --- 日本地址逻辑 ---
-function copyJpAddress() {
-    const zip = document.getElementById('zip-jp').value;
-    const region = document.getElementById('region-jp').value;
-    const locality = document.getElementById('locality-jp').value;
-    const street = document.getElementById('street-jp').value;
-    if (!region) { showToast("请先输入有效邮编"); return; }
-    const full = `〒${zip} ${region}${locality}${street}`;
-    navigator.clipboard.writeText(full).then(() => showToast("地址已复制"));
-}
-
-// --- 标签打印逻辑 ---
-function toggleCustomMode() {
-    const isCustom = document.getElementById('mode').value === "CUSTOM";
-    document.getElementById('custom-mode-input').style.display = isCustom ? "block" : "none";
-}
-
+// 标签预览生成
 function handleGenerate() {
     const qty = parseInt(document.getElementById('qty').value) || 1;
     const prefix = document.getElementById('prefix').value || "HCN";
-    const modeSelect = document.getElementById('mode');
-    const modeText = (modeSelect.value === "CUSTOM") ? document.getElementById('custom-mode-input').value : modeSelect.options[modeSelect.selectedIndex].text;
-    const sizeClass = document.getElementById('label-size').value;
-    const codeType = document.getElementById('code-type').value;
+    const mode = document.getElementById('mode');
+    const modeText = (mode.value === "CUSTOM") ? document.getElementById('custom-mode-input').value : mode.options[mode.selectedIndex].text;
+    const size = document.getElementById('label-size').value;
+    const type = document.getElementById('code-type').value;
     const container = document.getElementById('container');
     container.innerHTML = '';
     
     const now = new Date();
-    const dateKey = now.toISOString().slice(2,10).replace(/-/g,'');
-    const randomSuffix = Math.floor(Math.random() * 900 + 100);
-    const mainTracking = `${prefix}${dateKey}${randomSuffix}`;
-    lastBatchData = { mode: modeText, mainTracking: mainTracking, total: qty, date: now.toLocaleDateString(), size: sizeClass };
+    const track = `${prefix}${now.toISOString().slice(2,10).replace(/-/g,'')}${Math.floor(Math.random()*900+100)}`;
+    lastBatchData = { mode: modeText, mainTracking: track, total: qty, date: now.toLocaleDateString(), size: size };
 
     for(let i=1; i<=qty; i++) {
-        const displayLabel = `${i} / ${qty}`;
-        const trackingWithCounter = `${mainTracking}-${i}`;
-        const codeContent = `${trackingWithCounter} | ${displayLabel}`;
+        const trk = `${track}-${i}`;
         const wrapper = document.createElement('div');
-        wrapper.className = `page-wrapper ${sizeClass}`;
-        
-        let codeDataUrl = '';
-        if(codeType === 'BARCODE') {
-            const tempCanvas = document.getElementById('temp-canvas');
-            JsBarcode(tempCanvas, codeContent, { format: "CODE128", width: 1.8, height: 70, displayValue: false, margin: 0 });
-            codeDataUrl = tempCanvas.toDataURL('image/png');
+        wrapper.className = `page-wrapper ${size}`;
+        let codeImg = '';
+        if(type === 'BARCODE') {
+            JsBarcode(document.getElementById('temp-canvas'), trk, { format: "CODE128", width: 1.8, height: 70, displayValue: false });
+            codeImg = document.getElementById('temp-canvas').toDataURL();
         } else {
-            const qrBox = document.getElementById('qr-gen-box');
-            qrBox.innerHTML = '';
-            new QRCode(qrBox, { text: codeContent, width: 250, height: 250, correctLevel: QRCode.CorrectLevel.M });
-            codeDataUrl = qrBox.querySelector('canvas').toDataURL('image/png');
+            const qr = document.getElementById('qr-gen-box'); qr.innerHTML = '';
+            new QRCode(qr, { text: trk, width: 250, height: 250 });
+            codeImg = qr.querySelector('canvas').toDataURL();
         }
-        wrapper.innerHTML = `<div class="label-content"><div class="header-mode">${modeText}</div><div style="text-align:center"><div class="big-qty">${displayLabel}</div><div class="big-tracking">${trackingWithCounter}</div></div><div class="code-area"><img src="${codeDataUrl}" class="${codeType==='BARCODE'?'barcode-img':'qrcode-img'}"></div><div class="footer-made">MADE IN CHINA</div></div>`;
+        wrapper.innerHTML = `<div class="label-content"><div class="header-mode">${modeText}</div><div style="text-align:center"><div class="big-qty">${i} / ${qty}</div><div class="big-tracking">${trk}</div></div><div class="code-area"><img src="${codeImg}" class="${type==='BARCODE'?'barcode-img':'qrcode-img'}"></div><div class="footer-made">MADE IN CHINA</div></div>`;
         container.appendChild(wrapper);
     }
     showToast("预览已生成");
 }
 
+// 手机兼容 PDF 导出
 async function handleExportPDF() {
     const pages = document.querySelectorAll('.page-wrapper');
-    if(pages.length === 0) return alert("请先生成预览");
-    const btn = document.getElementById('btn-share');
-    btn.innerText = "正在渲染PDF..."; btn.disabled = true;
+    if(!pages.length || !lastBatchData) return alert("请先预览标签");
+    const btn = document.getElementById('btn-share-pdf');
+    btn.innerText = "生成中..."; btn.disabled = true;
     const dims = { 'size-100-100': [100, 100], 'size-100-50': [100, 50], 'size-80-80': [80, 80] }[lastBatchData.size];
     try {
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF({ unit: 'mm', format: dims, compress: true });
         for (let i = 0; i < pages.length; i++) {
-            const canvas = await html2canvas(pages[i], { scale: 2 });
+            const canvas = await html2canvas(pages[i], { scale: 1.5, useCORS: true });
             if (i > 0) pdf.addPage(dims);
-            pdf.addImage(canvas.toDataURL('image/jpeg', 0.8), 'JPEG', 0, 0, dims[0], dims[1]);
+            pdf.addImage(canvas.toDataURL('image/jpeg', 0.7), 'JPEG', 0, 0, dims[0], dims[1]);
         }
-        pdf.save(`${lastBatchData.mainTracking}.pdf`);
-    } catch (err) { alert("生成失败"); }
+        const pdfOutput = pdf.output('blob');
+        const blobURL = URL.createObjectURL(pdfOutput);
+        const dl = document.createElement('a');
+        dl.href = blobURL; dl.download = `${lastBatchData.mainTracking}.pdf`;
+        document.body.appendChild(dl); dl.click(); document.body.removeChild(dl);
+        showToast("PDF 导出成功");
+    } catch (e) { alert("导出失败，请减少件数再试"); }
     finally { btn.innerText = "3. 分享/下载 PDF"; btn.disabled = false; }
 }
 
+// 手机兼容 CSV 导出
 function handleExportCSV() {
-    if(!lastBatchData) return alert("无数据");
-    const content = `运输方式,主单号,总件数,日期\n"${lastBatchData.mode}","${lastBatchData.mainTracking}",${lastBatchData.total},"${lastBatchData.date}"`;
-    const blob = new Blob(["\ufeff" + content], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `${lastBatchData.mainTracking}.csv`;
-    link.click();
-}
-
-function copyInfo() {
     if(!lastBatchData) return alert("请先预览");
-    const info = `日期: ${lastBatchData.date}\n单号: ${lastBatchData.mainTracking}\n件数: ${lastBatchData.total}件\n运输: ${lastBatchData.mode}`;
-    navigator.clipboard.writeText(info).then(() => showToast("已复制"));
+    const csvContent = "\ufeff运输方式,主单号,总件数,日期\n" + `"${lastBatchData.mode}","${lastBatchData.mainTracking}",${lastBatchData.total},"${lastBatchData.date}"`;
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url; link.download = `${lastBatchData.mainTracking}.csv`;
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    showToast("CSV 已下载");
 }
 
-// --- 汇率/天气逻辑 ---
+// 汇率转换功能
 async function initRates() {
-    try {
-        const res = await fetch('https://open.er-api.com/v6/latest/USD');
-        const data = await res.json();
-        if(data && data.rates) { rates = data.rates; convertRate('left'); }
-    } catch(e) {}
+    try { const res = await fetch('https://open.er-api.com/v6/latest/USD'); const data = await res.json(); rates = data.rates; convertRate('left'); } catch(e){}
 }
-
 function convertRate(dir) {
     if(!rates.USD) return;
     const from = document.getElementById('cur-left').value, to = document.getElementById('cur-right').value;
@@ -369,8 +316,9 @@ function convertRate(dir) {
     else l.value = (r.value / rates[to] * rates[from]).toFixed(2);
 }
 
+// 天气查询
 async function getRichWeather() {
-    const city = document.getElementById('city-input').value.trim() || 'Shenzhen';
+    const city = document.getElementById('city-input').value || 'Shenzhen';
     try {
         const res = await fetch(`https://wttr.in/${city}?format=j1`);
         const data = await res.json();
@@ -381,59 +329,50 @@ async function getRichWeather() {
         document.getElementById('w-hum').innerText = `${cur.humidity}%`;
         document.getElementById('w-sunr').innerText = cur.astronomy[0].sunrise;
         document.getElementById('w-suns').innerText = cur.astronomy[0].sunset;
-    } catch (e) { alert("查询失败"); }
+    } catch(e){ alert("查询失败"); }
 }
 
-// --- 日历逻辑 ---
+// 视频下载
+function handleVideoDownload() {
+    let url = document.getElementById('videoUrlInput').value.trim();
+    if (!url) return alert("请输入链接");
+    if (!url.startsWith('http')) url = 'https://' + url;
+    document.getElementById('v-status').innerText = "🚀 正在跳转解析器...";
+    setTimeout(() => { window.location.href = "https://9xbuddy.com/process?url=" + encodeURIComponent(url); }, 600);
+}
+
+// 农历日历
 function initCalendar() {
-    const grid = document.getElementById('calendar-grid');
-    grid.innerHTML = '';
+    const grid = document.getElementById('calendar-grid'); grid.innerHTML = '';
     const year = currDate.getFullYear(), month = currDate.getMonth();
     document.getElementById('cal-month-title').innerText = `${year}年 ${month + 1}月`;
-    ['日','一','二','三','四','五','六'].forEach(label => {
-        grid.innerHTML += `<div class="cal-cell" style="font-weight:bold;background:#f8f9fa;height:35px">${label}</div>`;
-    });
-    const firstDay = new Date(year, month, 1).getDay(), daysInMonth = new Date(year, month + 1, 0).getDate();
-    for(let i=0; i<firstDay; i++) grid.innerHTML += `<div class="cal-cell"></div>`;
-    for(let d=1; d<=daysInMonth; d++) {
-        const dateKey = `${year}-${month+1}-${d}`;
-        const isToday = new Date().toDateString() === new Date(year, month, d).toDateString();
+    ['日','一','二','三','四','五','六'].forEach(l => grid.innerHTML += `<div class="cal-cell" style="font-weight:bold;height:35px;background:#f8f9fa;">${l}</div>`);
+    const first = new Date(year, month, 1).getDay(), days = new Date(year, month + 1, 0).getDate();
+    for(let i=0; i<first; i++) grid.innerHTML += `<div class="cal-cell"></div>`;
+    for(let d=1; d<=days; d++) {
+        const key = `${year}-${month+1}-${d}`, isToday = new Date().toDateString() === new Date(year, month, d).toDateString();
         const lunarDate = Lunar.fromDate(new Date(year, month, d));
-        let lunarTxt = lunarDate.getJieQi() || lunarDate.getDayInChinese();
-        const cell = document.createElement('div');
-        cell.className = 'cal-cell';
-        cell.innerHTML = `${isToday?'<div class="today-circle">'+d+'</div>':d}<div class="lunar-text">${lunarTxt}</div>${memos[dateKey]?'<div class="event-dot"></div>':''}`;
+        const cell = document.createElement('div'); cell.className = 'cal-cell';
+        cell.innerHTML = `${isToday?'<div class="today-circle">'+d+'</div>':d}<div class="lunar-text">${lunarDate.getJieQi() || lunarDate.getDayInChinese()}</div>${memos[key]?'<div class="event-dot"></div>':''}`;
         cell.onclick = () => {
-            const n = prompt(`${dateKey} 备注:`, memos[dateKey]||"");
-            if(n!==null) { if(n.trim()==="") delete memos[dateKey]; else memos[dateKey]=n; localStorage.setItem('hcn_calendar_memos', JSON.stringify(memos)); initCalendar(); }
+            const n = prompt(`备注:`, memos[key]||"");
+            if(n!==null) { if(!n.trim()) delete memos[key]; else memos[key]=n; localStorage.setItem('hcn_calendar_memos', JSON.stringify(memos)); initCalendar(); }
         };
         grid.appendChild(cell);
     }
 }
-function changeMonth(delta) { currDate.setMonth(currDate.getMonth() + delta); initCalendar(); }
+function changeMonth(d) { currDate.setMonth(currDate.getMonth() + d); initCalendar(); }
 
-// --- 行情逻辑 (保持原版配置) ---
+// 其他辅助
 function updateStockChart() {
     const symbol = document.getElementById('stock-search').value || "300446";
     document.getElementById('stock-chart-container').innerHTML = '';
-    new TradingView.widget({
-        "autosize": true,
-        "symbol": symbol,
-        "interval": "D",
-        "timezone": "Etc/UTC",
-        "theme": "light",
-        "style": "1",
-        "locale": "zh_CN",
-        "container_id": "stock-chart-container",
-        "studies": ["RSI@tv-basicstudies"]
-    });
+    new TradingView.widget({"autosize":true,"symbol":symbol,"interval":"D","timezone":"Etc/UTC","theme":"light","style":"1","locale":"zh_CN","container_id":"stock-chart-container","toolbar_bg":"#f1f3f6","withdateranges":true,"hide_side_toolbar":false,"save_image":true,"studies":["RSI@tv-basicstudies"]});
 }
-
-function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.innerText = msg; t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2000);
-}
+function toggleCustomMode() { document.getElementById('custom-mode-input').style.display = (document.getElementById('mode').value === "CUSTOM") ? "block" : "none"; }
+function copyJpAddress() { navigator.clipboard.writeText(`〒${document.getElementById('zip-jp').value} ${document.getElementById('region-jp').value}${document.getElementById('locality-jp').value}${document.getElementById('street-jp').value}`).then(() => showToast("地址已复制")); }
+function copyInfo() { if(!lastBatchData) return alert("请先预览"); navigator.clipboard.writeText(`单号: ${lastBatchData.mainTracking}\n件数: ${lastBatchData.total}\n运输: ${lastBatchData.mode}`).then(() => showToast("已复制")); }
+function showToast(msg) { const t = document.getElementById('toast'); t.innerText = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
 </script>
 </body>
 </html>
