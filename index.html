@@ -375,7 +375,7 @@ function changeMonth(d) { currDate.setMonth(currDate.getMonth() + d); initCalend
 
 // 其他辅助
 function updateStockChart() {
-    const symbol = document.getElementById('stock-search').value || "300446";
+    const symbol = document.getElementById('stock-search').value || "001331";
     document.getElementById('stock-chart-container').innerHTML = '';
     new TradingView.widget({"autosize":true,"symbol":symbol,"interval":"D","timezone":"Etc/UTC","theme":"light","style":"1","locale":"zh_CN","container_id":"stock-chart-container","toolbar_bg":"#f1f3f6","withdateranges":true,"hide_side_toolbar":false,"save_image":true,"studies":["RSI@tv-basicstudies"]});
 }
